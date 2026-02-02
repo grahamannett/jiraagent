@@ -98,6 +98,17 @@ uv run jira-agent health        # Quick config validation
 uv run jira-agent health --full # Full connectivity check
 ```
 
+## Development and Testing
+
+Install dev dependencies from `pyproject.toml` (the `dev` extra), then run pytest:
+
+```bash
+uv sync --extra dev
+uv run pytest
+```
+
+If you want all optional dependency groups, use `uv sync --all-extras`.
+
 ## Migration Note
 
 **Breaking change in v1.0**: `GITHUB_OWNER`, `GITHUB_REPO`, and `JIRA_URL` are now required environment variables (previously had defaults). Create `mise.local.toml` from the example template to configure these.
@@ -144,12 +155,14 @@ uv run jira-agent run SPE-123 --audit-stderr  # also log to stderr
 The agent includes built-in security hooks that block dangerous operations:
 
 **Blocked file paths:**
+
 - `.git/` directory
 - `.env` files
 - `node_modules/`
 - `.ssh/`, `.aws/`, `.gnupg/` directories
 
 **Blocked commands:**
+
 - `rm -rf /`, `sudo`, `su`, `doas`
 - `chmod 777`, `chown -R`
 - `git push --force`, `git reset --hard`
