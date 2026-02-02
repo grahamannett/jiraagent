@@ -21,6 +21,7 @@ def get_all_integrations() -> list[Integration]:
         List of all integration instances (both HTTP and MCP).
     """
     from jira_agent.integrations.browser import BrowserMCP
+    from jira_agent.integrations.claude import ClaudeSDK
     from jira_agent.integrations.jira import JiraClient, JiraMCP
 
     integrations: list[Integration] = []
@@ -34,6 +35,9 @@ def get_all_integrations() -> list[Integration]:
     # MCP integrations
     integrations.append(JiraMCP())
     integrations.append(BrowserMCP())
+
+    # SDK integrations
+    integrations.append(ClaudeSDK())
 
     return integrations
 

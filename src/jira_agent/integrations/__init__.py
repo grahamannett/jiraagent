@@ -34,6 +34,9 @@ from jira_agent.integrations.base import (
 # Browser integrations
 from jira_agent.integrations.browser import BrowserMCP
 
+# Claude SDK integration
+from jira_agent.integrations.claude import ClaudeSDK
+
 # Health check functions
 from jira_agent.integrations.health import (
     check_jira,
@@ -83,4 +86,6 @@ __all__ = [
     "get_client",
     # Browser
     "BrowserMCP",
+    # Claude SDK
+    "ClaudeSDK",
 ]

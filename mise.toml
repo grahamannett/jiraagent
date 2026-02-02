@@ -1,6 +1,7 @@
 [tools]
     node   = "latest"
-    python = "3.12"
+    python = "3.13"
+    ruff   = "0.14.14"
 
 [env]
     # Required environment variables - set these in mise.local.toml
@@ -14,7 +15,7 @@
     # JIRA_USERNAME  - Your Jira/Atlassian email
     # JIRA_API_TOKEN - Your Jira API token
 
-    # _.python.venv = { path = ".venv", create = true }
+    _.python.venv = { path = ".venv", create = true }
     # --- Development ---
 
 [tasks.test]

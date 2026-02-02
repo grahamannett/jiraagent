@@ -15,8 +15,8 @@ from pathlib import Path
 
 from jira_agent.context.generator import ContextGenerator
 
-# Project root directory (where jira_agent package lives)
-PROJECT_ROOT = Path(__file__).parent.parent.parent
+# Project root directory (src layout: package is under src/)
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 
 
 def get_default_context_dir() -> Path:
