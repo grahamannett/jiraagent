@@ -1,0 +1,86 @@
+[tools]
+    node   = "latest"
+    python = "3.12"
+
+[env]
+    # Required environment variables - set these in mise.local.toml
+    # See mise.local.toml.example for a template
+    #
+    # REPO_PATH      - Path to the target repository
+    # WORKTREES_PATH - Path to git worktrees directory
+    # GITHUB_OWNER   - GitHub organization or username
+    # GITHUB_REPO    - GitHub repository name
+    # JIRA_URL       - Jira instance URL (e.g., https://company.atlassian.net)
+    # JIRA_USERNAME  - Your Jira/Atlassian email
+    # JIRA_API_TOKEN - Your Jira API token
+
+    # _.python.venv = { path = ".venv", create = true }
+    # --- Development ---
+
+[tasks.test]
+    description = "Run tests"
+    run         = "uv run pytest"
+
+[tasks.lint]
+    description = "Run linter"
+    run         = "uv run ruff check ."
+
+[tasks.format]
+    description = "Format code"
+    run         = "uv run ruff format ."
+
+    # --- Agent Commands ---
+
+[tasks.run]
+    description = "Process a Jira ticket"
+    usage       = 'arg "<ticket>" help="Jira ticket ID (e.g., SPE-123)"'
+    run         = "uv run jira-agent run ${usage_ticket?}"
+
+[tasks."run:branch"]
+    description = "Process ticket in main repo with auto-branch"
+    usage       = 'arg "<ticket>" help="Jira ticket ID"'
+    run         = "uv run jira-agent run ${usage_ticket?} --branch"
+
+[tasks."run:dry"]
+    description = "Preview ticket without processing"
+    usage       = 'arg "<ticket>" help="Jira ticket ID"'
+    run         = "uv run jira-agent run ${usage_ticket?} --dry-run"
+
+[tasks."run:verify"]
+    description = "Process ticket with browser verification"
+    usage       = 'arg "<ticket>" help="Jira ticket ID"'
+    run         = "uv run jira-agent run ${usage_ticket?} --branch --verify"
+
+[tasks.ticket]
+    description = "View Jira ticket details"
+    usage       = 'arg "<ticket>" help="Jira ticket ID"'
+    run         = "uv run jira-agent ticket ${usage_ticket?}"
+
+[tasks.cleanup]
+    description = "Remove worktree for a ticket"
+    usage       = 'arg "<ticket>" help="Jira ticket ID"'
+    run         = "uv run jira-agent cleanup ${usage_ticket?}"
+
+    # --- Context Generation ---
+
+[tasks."context:generate"]
+    description = "Generate basic context (fast, static analysis)"
+    run         = "uv run jira-agent context generate"
+
+[tasks."context:deep"]
+    description = "Generate deep context (slow, AI-powered)"
+    run         = "uv run jira-agent context generate --deep"
+
+[tasks."context:show"]
+    description = "Show current context content"
+    run         = "uv run jira-agent context show"
+
+[tasks."context:path"]
+    description = "Show default context file path"
+    run         = "uv run jira-agent context path"
+
+    # --- Health Check ---
+
+[tasks.health]
+    description = "Check Jira API connectivity"
+    run         = "uv run jira-agent health"
