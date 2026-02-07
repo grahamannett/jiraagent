@@ -1,6 +1,7 @@
 """Tests for CLI argument parsing with tyro."""
 
 from pathlib import Path
+from typing import Callable, Literal, TypeAlias, cast
 
 import pytest
 import tyro
@@ -16,6 +17,27 @@ from jira_agent.cli import (
     TicketArgs,
 )
 
+RunBoolAttr: TypeAlias = Literal["dry_run", "no_pr"]
+GenerateBoolAttr: TypeAlias = Literal["deep", "force"]
+ContextArgsType: TypeAlias = (
+    type[ContextShowArgs]
+    | type[ContextGenerateArgs]
+    | type[ContextPathArgs]
+)
+CliArgs: TypeAlias = (
+    RunArgs
+    | CleanupArgs
+    | TicketArgs
+    | ContextShowArgs
+    | ContextGenerateArgs
+    | ContextPathArgs
+    | HealthArgs
+)
+def parse_args(cli_args: list[str]) -> CliArgs:
+    """Parse CLI args via tyro with static typing support."""
+    tyro_target = cast(Callable[..., CliArgs], Args)
+    return tyro.cli(tyro_target, args=cli_args)
+
 
 class TestRunCommand:
     """Tests for the 'run' command argument parsing."""
@@ -23,11 +45,11 @@ class TestRunCommand:
     def test_requires_ticket_key(self):
         """Run command requires a ticket key."""
         with pytest.raises(SystemExit):
-            tyro.cli(Args, args=["run"])
+            _ = parse_args(["run"])
 
     def test_parses_ticket_key(self):
         """Ticket key is parsed as positional argument."""
-        args = tyro.cli(Args, args=["run", "SPE-123"])
+        args = parse_args(["run", "SPE-123"])
 
         assert isinstance(args, RunArgs)
         assert args.ticket == "SPE-123"
@@ -42,9 +64,14 @@ class TestRunCommand:
         ],
         ids=["dry-run-flag", "no-pr-flag", "no-dry-run", "no-no-pr"],
     )
-    def test_boolean_flags(self, cli_args, expected_attr, expected_value):
+    def test_boolean_flags(
+        self,
+        cli_args: list[str],
+        expected_attr: RunBoolAttr,
+        expected_value: bool,
+    ):
         """Boolean flags are parsed correctly."""
-        args = tyro.cli(Args, args=cli_args)
+        args = parse_args(cli_args)
 
         assert isinstance(args, RunArgs)
         assert getattr(args, expected_attr) == expected_value
@@ -57,16 +84,16 @@ class TestRunCommand:
         ],
         ids=["no-branch", "branch-with-value"],
     )
-    def test_branch_argument(self, cli_args, expected_branch):
+    def test_branch_argument(self, cli_args: list[str], expected_branch: str | None):
         """--branch flag handles values correctly."""
-        args = tyro.cli(Args, args=cli_args)
+        args = parse_args(cli_args)
 
         assert isinstance(args, RunArgs)
         assert args.branch == expected_branch
 
     def test_context_path_converted_to_path(self):
         """--context value is converted to Path."""
-        args = tyro.cli(Args, args=["run", "SPE-123", "--context", "/path/to/AGENT.md"])
+        args = parse_args(["run", "SPE-123", "--context", "/path/to/AGENT.md"])
 
         assert isinstance(args, RunArgs)
         assert args.context == Path("/path/to/AGENT.md")
@@ -74,16 +101,15 @@ class TestRunCommand:
 
     def test_base_commit_parsed(self):
         """--base-commit captures the commit SHA."""
-        args = tyro.cli(Args, args=["run", "SPE-123", "--base-commit", "abc123f"])
+        args = parse_args(["run", "SPE-123", "--base-commit", "abc123f"])
 
         assert isinstance(args, RunArgs)
         assert args.base_commit == "abc123f"
 
     def test_all_options_together(self):
         """All options can be combined."""
-        args = tyro.cli(
-            Args,
-            args=[
+        args = parse_args(
+            [
                 "run",
                 "SPE-123",
                 "--dry-run",
@@ -123,9 +149,14 @@ class TestRunCommand:
         ],
         ids=["defaults", "verify-flag", "custom-url", "verify-with-custom-url"],
     )
-    def test_verify_arguments(self, cli_args, expected_verify, expected_url):
+    def test_verify_arguments(
+        self,
+        cli_args: list[str],
+        expected_verify: bool,
+        expected_url: str,
+    ):
         """--verify and --verify-url flags are parsed correctly."""
-        args = tyro.cli(Args, args=cli_args)
+        args = parse_args(cli_args)
 
         assert isinstance(args, RunArgs)
         assert args.verify == expected_verify
@@ -148,10 +179,14 @@ class TestRunCommand:
         ids=["defaults", "summary-only", "metadata-only", "to-contexts-only", "all-summary-flags"],
     )
     def test_summary_arguments(
-        self, cli_args, expected_summary, expected_metadata, expected_to_contexts
+        self,
+        cli_args: list[str],
+        expected_summary: bool,
+        expected_metadata: bool,
+        expected_to_contexts: bool,
     ):
         """--summary flags are parsed correctly."""
-        args = tyro.cli(Args, args=cli_args)
+        args = parse_args(cli_args)
 
         assert isinstance(args, RunArgs)
         assert args.summary == expected_summary
@@ -160,46 +195,43 @@ class TestRunCommand:
 
     def test_summary_filepath_argument(self):
         """--summary-filepath is parsed correctly."""
-        args = tyro.cli(
-            Args, args=["run", "SPE-123", "--summary-filepath", "/custom/path/summary.md"]
-        )
+        args = parse_args(["run", "SPE-123", "--summary-filepath", "/custom/path/summary.md"])
 
         assert isinstance(args, RunArgs)
         assert args.summary_filepath == Path("/custom/path/summary.md")
 
     def test_summary_filepath_defaults_none(self):
         """--summary-filepath defaults to None."""
-        args = tyro.cli(Args, args=["run", "SPE-123"])
+        args = parse_args(["run", "SPE-123"])
 
         assert isinstance(args, RunArgs)
         assert args.summary_filepath is None
 
     def test_info_file_defaults_empty(self):
         """--info-file defaults to empty list."""
-        args = tyro.cli(Args, args=["run", "SPE-123"])
+        args = parse_args(["run", "SPE-123"])
 
         assert isinstance(args, RunArgs)
         assert args.info_file == []
 
     def test_info_text_defaults_empty(self):
         """--info-text defaults to empty list."""
-        args = tyro.cli(Args, args=["run", "SPE-123"])
+        args = parse_args(["run", "SPE-123"])
 
         assert isinstance(args, RunArgs)
         assert args.info_text == []
 
     def test_info_file_single_value(self):
         """--info-file accepts a single path."""
-        args = tyro.cli(Args, args=["run", "SPE-123", "--info-file", "/path/to/notes.md"])
+        args = parse_args(["run", "SPE-123", "--info-file", "/path/to/notes.md"])
 
         assert isinstance(args, RunArgs)
         assert args.info_file == [Path("/path/to/notes.md")]
 
     def test_info_file_multiple_values(self):
         """--info-file can be used multiple times."""
-        args = tyro.cli(
-            Args,
-            args=[
+        args = parse_args(
+            [
                 "run",
                 "SPE-123",
                 "--info-file",
@@ -214,16 +246,15 @@ class TestRunCommand:
 
     def test_info_text_single_value(self):
         """--info-text accepts a single string."""
-        args = tyro.cli(Args, args=["run", "SPE-123", "--info-text", "Focus on backend"])
+        args = parse_args(["run", "SPE-123", "--info-text", "Focus on backend"])
 
         assert isinstance(args, RunArgs)
         assert args.info_text == ["Focus on backend"]
 
     def test_info_text_multiple_values(self):
         """--info-text can be used multiple times."""
-        args = tyro.cli(
-            Args,
-            args=[
+        args = parse_args(
+            [
                 "run",
                 "SPE-123",
                 "--info-text",
@@ -238,9 +269,8 @@ class TestRunCommand:
 
     def test_info_file_and_text_combined(self):
         """--info-file and --info-text can be used together."""
-        args = tyro.cli(
-            Args,
-            args=[
+        args = parse_args(
+            [
                 "run",
                 "SPE-123",
                 "--info-file",
@@ -261,11 +291,11 @@ class TestCleanupCommand:
     def test_requires_ticket_key(self):
         """Cleanup command requires a ticket key."""
         with pytest.raises(SystemExit):
-            tyro.cli(Args, args=["cleanup"])
+            _ = parse_args(["cleanup"])
 
     def test_parses_ticket_key(self):
         """Ticket key is parsed correctly."""
-        args = tyro.cli(Args, args=["cleanup", "SPE-123"])
+        args = parse_args(["cleanup", "SPE-123"])
 
         assert isinstance(args, CleanupArgs)
         assert args.ticket == "SPE-123"
@@ -277,11 +307,11 @@ class TestTicketCommand:
     def test_requires_ticket_key(self):
         """Ticket command requires a ticket key."""
         with pytest.raises(SystemExit):
-            tyro.cli(Args, args=["ticket"])
+            _ = parse_args(["ticket"])
 
     def test_parses_ticket_key(self):
         """Ticket key is parsed correctly."""
-        args = tyro.cli(Args, args=["ticket", "SPE-123"])
+        args = parse_args(["ticket", "SPE-123"])
 
         assert isinstance(args, TicketArgs)
         assert args.ticket == "SPE-123"
@@ -292,7 +322,7 @@ class TestContextCommand:
 
     def test_context_show_default(self):
         """'context show' is parsed correctly."""
-        args = tyro.cli(Args, args=["context", "show"])
+        args = parse_args(["context", "show"])
 
         assert isinstance(args, ContextShowArgs)
 
@@ -304,15 +334,15 @@ class TestContextCommand:
             (["context", "path"], ContextPathArgs),
         ],
     )
-    def test_subcommands_parsed(self, cli_args, expected_type):
+    def test_subcommands_parsed(self, cli_args: list[str], expected_type: ContextArgsType):
         """Context subcommands are parsed correctly."""
-        args = tyro.cli(Args, args=cli_args)
+        args = parse_args(cli_args)
 
         assert isinstance(args, expected_type)
 
     def test_generate_output_path(self):
         """--output flag in generate is converted to Path."""
-        args = tyro.cli(Args, args=["context", "generate", "--output", "/custom/AGENT.md"])
+        args = parse_args(["context", "generate", "--output", "/custom/AGENT.md"])
 
         assert isinstance(args, ContextGenerateArgs)
         assert args.output == Path("/custom/AGENT.md")
@@ -327,16 +357,21 @@ class TestContextCommand:
         ],
         ids=["deep-flag", "force-flag", "no-deep", "no-force"],
     )
-    def test_generate_boolean_flags(self, cli_args, attr, expected):
+    def test_generate_boolean_flags(
+        self,
+        cli_args: list[str],
+        attr: GenerateBoolAttr,
+        expected: bool,
+    ):
         """Generate subcommand boolean flags work correctly."""
-        args = tyro.cli(Args, args=cli_args)
+        args = parse_args(cli_args)
 
         assert isinstance(args, ContextGenerateArgs)
         assert getattr(args, attr) == expected
 
     def test_show_output_path(self):
         """--output flag in show is converted to Path."""
-        args = tyro.cli(Args, args=["context", "show", "--output", "/path/AGENT.md"])
+        args = parse_args(["context", "show", "--output", "/path/AGENT.md"])
 
         assert isinstance(args, ContextShowArgs)
         assert args.output == Path("/path/AGENT.md")
@@ -347,7 +382,7 @@ class TestHealthCommand:
 
     def test_health_defaults(self):
         """Health command has correct defaults."""
-        args = tyro.cli(Args, args=["health"])
+        args = parse_args(["health"])
 
         assert isinstance(args, HealthArgs)
         assert args.full is False
@@ -356,21 +391,21 @@ class TestHealthCommand:
 
     def test_health_full_flag(self):
         """--full flag is parsed correctly."""
-        args = tyro.cli(Args, args=["health", "--full"])
+        args = parse_args(["health", "--full"])
 
         assert isinstance(args, HealthArgs)
         assert args.full is True
 
     def test_health_playwright_flag(self):
         """--playwright flag is parsed correctly."""
-        args = tyro.cli(Args, args=["health", "--playwright"])
+        args = parse_args(["health", "--playwright"])
 
         assert isinstance(args, HealthArgs)
         assert args.playwright is True
 
     def test_health_timeout(self):
         """--timeout value is parsed correctly."""
-        args = tyro.cli(Args, args=["health", "--timeout", "60"])
+        args = parse_args(["health", "--timeout", "60"])
 
         assert isinstance(args, HealthArgs)
         assert args.timeout == 60
@@ -382,21 +417,21 @@ class TestParserHelp:
     def test_main_help_exits_cleanly(self):
         """Main --help exits with code 0."""
         with pytest.raises(SystemExit) as exc_info:
-            tyro.cli(Args, args=["--help"])
+            _ = parse_args(["--help"])
 
         assert exc_info.value.code == 0
 
     @pytest.mark.parametrize("command", ["run", "cleanup", "ticket", "health"])
-    def test_subcommand_help_exits_cleanly(self, command):
+    def test_subcommand_help_exits_cleanly(self, command: str):
         """Subcommand --help exits with code 0."""
         with pytest.raises(SystemExit) as exc_info:
-            tyro.cli(Args, args=[command, "--help"])
+            _ = parse_args([command, "--help"])
 
         assert exc_info.value.code == 0
 
     def test_context_subcommand_help_exits_cleanly(self):
         """Context subcommand --help exits with code 0."""
         with pytest.raises(SystemExit) as exc_info:
-            tyro.cli(Args, args=["context", "--help"])
+            _ = parse_args(["context", "--help"])
 
         assert exc_info.value.code == 0

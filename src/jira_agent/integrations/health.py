@@ -1,6 +1,6 @@
 """Health checks for service connectivity using the integration registry."""
 
-import asyncio
+import anyio
 from typing import TYPE_CHECKING
 
 from jira_agent.integrations.base import (
@@ -93,7 +93,7 @@ def run_health_checks(include_mcp: bool = False) -> list[HealthCheckResult]:
     Returns:
         List of health check results.
     """
-    return asyncio.run(run_health_checks_async(include_mcp))
+    return anyio.run(run_health_checks_async, include_mcp)
 
 
 def run_config_checks(include_mcp: bool = True) -> list[HealthCheckResult]:
@@ -144,7 +144,7 @@ def check_jira() -> HealthCheckResult:
 
     try:
         client = JiraClient()
-        return asyncio.run(client.check_health())
+        return anyio.run(client.check_health)
     except ValueError as e:
         return HealthCheckResult(
             name="Jira HTTP",

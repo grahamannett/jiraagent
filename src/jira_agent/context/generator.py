@@ -16,7 +16,7 @@ Usage:
 
 from __future__ import annotations
 
-import asyncio
+import anyio
 import json
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
@@ -562,7 +562,7 @@ class ContextGenerator:
         # Step 2: Expand with AI (only if deep=True)
         print("\nExpanding with AI-powered deep analysis...")
         print("This will take several minutes...\n")
-        return asyncio.run(self._expand_with_ai(repo_path, output_file))
+        return anyio.run(self._expand_with_ai, repo_path, output_file)
 
     def _run_static_analysis(self, repo_path: Path) -> str:
         """Run all static analyzers and produce markdown."""

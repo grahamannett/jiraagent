@@ -1,6 +1,6 @@
 """Claude agent using the Agent SDK for code exploration and modification."""
 
-import asyncio
+import anyio
 import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -328,8 +328,8 @@ def run(
     Returns:
         AgentResult with implementation status and details.
     """
-    return asyncio.run(
-        run_agent(worktree, ticket, context_path, max_turns, additional_info, audit_logger)
+    return anyio.run(
+        run_agent, worktree, ticket, context_path, max_turns, additional_info, audit_logger
     )
 
 
@@ -499,7 +499,7 @@ def run_browser_verify(
     Returns:
         BrowserVerificationResult with verification details.
     """
-    return asyncio.run(run_browser_verification(ticket, context_path, base_url, max_turns))
+    return anyio.run(run_browser_verification, ticket, context_path, base_url, max_turns)
 
 
 # --- Worktree Management ---
