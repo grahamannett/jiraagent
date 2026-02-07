@@ -47,8 +47,7 @@ def validate_ticket_key(key: str) -> None:
 
     if not TICKET_KEY_PATTERN.match(key):
         raise ValidationError(
-            f"Invalid ticket key format: '{key}'. "
-            f"Expected format: PROJECT-123 (uppercase letters, hyphen, number)"
+            f"Invalid ticket key format: '{key}'. Expected format: PROJECT-123 (uppercase letters, hyphen, number)"
         )
 
 
@@ -110,9 +109,9 @@ def validate_git_state(repo: Path) -> None:
             preview.append(f"... and {file_count - 3} more files")
 
         raise ValidationError(
-            f"Uncommitted changes in repository. "
-            f"Please commit or stash before continuing.\n"
-            f"Changed files:\n  " + "\n  ".join(preview)
+            "Uncommitted changes in repository. "
+            "Please commit or stash before continuing.\n"
+            "Changed files:\n  " + "\n  ".join(preview)
         )
 
 

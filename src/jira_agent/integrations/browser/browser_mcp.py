@@ -85,10 +85,7 @@ class BrowserMCP(MCPIntegration):
 
     def _get_health_check_prompt(self) -> str:
         """Return the prompt to use for MCP health check."""
-        return (
-            "Navigate to https://example.com and take a screenshot, "
-            "saving it as /tmp/health_check.png"
-        )
+        return "Navigate to https://example.com and take a screenshot, saving it as /tmp/health_check.png"
 
     def _get_health_check_tools(self) -> list[str]:
         """Return the allowed tools for health check query."""

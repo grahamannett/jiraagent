@@ -140,9 +140,7 @@ def make_security_hook():
         An async hook function that blocks dangerous operations.
     """
 
-    async def security_hook(
-        input_data: dict[str, Any], tool_use_id: str, _context: Any
-    ) -> dict[str, Any]:
+    async def security_hook(input_data: dict[str, Any], tool_use_id: str, _context: Any) -> dict[str, Any]:
         """PreToolUse hook that blocks dangerous operations.
 
         If a dangerous operation is detected, returns an error result

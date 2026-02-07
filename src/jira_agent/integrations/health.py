@@ -80,8 +80,18 @@ async def run_health_checks_async(
         return []
 
     # Run all health checks concurrently
-    results = await asyncio.gather(*[i.check_health() for i in integrations])
-    return list(results)
+    results: list[HealthCheckResult] = []
+
+    async with anyio.create_task_group() as tg:
+
+        async def _check(integration: Integration) -> None:
+            result = await integration.check_health()
+            results.append(result)
+
+        for integration in integrations:
+            tg.start_soon(_check, integration)
+
+    return results
 
 
 def run_health_checks(include_mcp: bool = False) -> list[HealthCheckResult]:

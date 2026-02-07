@@ -45,9 +45,7 @@ def sample_result() -> AgentResult:
 
 
 @pytest.fixture
-def sample_context(
-    sample_ticket: Ticket, sample_result: AgentResult, tmp_path: Path
-) -> SummaryContext:
+def sample_context(sample_ticket: Ticket, sample_result: AgentResult, tmp_path: Path) -> SummaryContext:
     """Create a sample summary context for testing."""
     return SummaryContext(
         ticket=sample_ticket,
@@ -76,9 +74,7 @@ class TestGenerateSummary:
         assert "## Remaining Work" in summary
         assert "(none)" in summary  # No remaining work
 
-    def test_summary_with_remaining_work(
-        self, sample_ticket: Ticket, tmp_path: Path
-    ) -> None:
+    def test_summary_with_remaining_work(self, sample_ticket: Ticket, tmp_path: Path) -> None:
         """Test summary with remaining work items."""
         result = AgentResult(
             success=True,
@@ -115,9 +111,7 @@ class TestGenerateSummary:
         assert "**Ticket Priority**: High" in summary
         assert "https://company.atlassian.net/browse/PROJ-123" in summary
 
-    def test_summary_without_branch(
-        self, sample_ticket: Ticket, sample_result: AgentResult, tmp_path: Path
-    ) -> None:
+    def test_summary_without_branch(self, sample_ticket: Ticket, sample_result: AgentResult, tmp_path: Path) -> None:
         """Test summary when no branch name is provided."""
         ctx = SummaryContext(
             ticket=sample_ticket,
@@ -156,9 +150,7 @@ class TestGenerateSummary:
         assert "Failed" in summary
         assert "Could not parse schema" in summary
 
-    def test_summary_relative_paths(
-        self, sample_ticket: Ticket, tmp_path: Path
-    ) -> None:
+    def test_summary_relative_paths(self, sample_ticket: Ticket, tmp_path: Path) -> None:
         """Test that file paths are made relative to worktree."""
         worktree = tmp_path / "myworktree"
         result = AgentResult(
@@ -243,9 +235,7 @@ class TestGetOutputPath:
         expected = sample_context.worktree_path / "AGENT_SUMMARY.md"
         assert result == expected
 
-    def test_to_contexts_directory(
-        self, sample_context: SummaryContext, tmp_path: Path
-    ) -> None:
+    def test_to_contexts_directory(self, sample_context: SummaryContext, tmp_path: Path) -> None:
         """Test output to contexts directory."""
         options = SummaryOptions(to_contexts=True)
         contexts_dir = tmp_path / "contexts"
@@ -260,9 +250,7 @@ class TestGetOutputPath:
 class TestWriteSummary:
     """Tests for write_summary function."""
 
-    def test_write_to_default_location(
-        self, sample_context: SummaryContext, tmp_path: Path
-    ) -> None:
+    def test_write_to_default_location(self, sample_context: SummaryContext, tmp_path: Path) -> None:
         """Test writing summary to default worktree location."""
         # Update context to use tmp_path
         sample_context.worktree_path = tmp_path
@@ -275,9 +263,7 @@ class TestWriteSummary:
         content = result.read_text()
         assert "PROJ-123" in content
 
-    def test_write_to_contexts_with_versioning(
-        self, sample_context: SummaryContext, tmp_path: Path
-    ) -> None:
+    def test_write_to_contexts_with_versioning(self, sample_context: SummaryContext, tmp_path: Path) -> None:
         """Test writing to contexts directory with versioning."""
         sample_context.worktree_path = tmp_path / "myrepo"
         contexts_dir = tmp_path / "contexts"
@@ -293,9 +279,7 @@ class TestWriteSummary:
         assert path2.exists()
         assert (path2.parent / "AGENT_SUMMARY.1.md").exists()
 
-    def test_write_to_custom_path(
-        self, sample_context: SummaryContext, tmp_path: Path
-    ) -> None:
+    def test_write_to_custom_path(self, sample_context: SummaryContext, tmp_path: Path) -> None:
         """Test writing to custom filepath."""
         custom_path = tmp_path / "custom" / "MY_SUMMARY.md"
         options = SummaryOptions(output_path=custom_path)
@@ -305,9 +289,7 @@ class TestWriteSummary:
         assert result == custom_path
         assert result.exists()
 
-    def test_write_creates_parent_directories(
-        self, sample_context: SummaryContext, tmp_path: Path
-    ) -> None:
+    def test_write_creates_parent_directories(self, sample_context: SummaryContext, tmp_path: Path) -> None:
         """Test that parent directories are created."""
         deep_path = tmp_path / "a" / "b" / "c" / "summary.md"
         options = SummaryOptions(output_path=deep_path)

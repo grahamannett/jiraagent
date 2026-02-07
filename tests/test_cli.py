@@ -19,20 +19,12 @@ from jira_agent.cli import (
 
 RunBoolAttr: TypeAlias = Literal["dry_run", "no_pr"]
 GenerateBoolAttr: TypeAlias = Literal["deep", "force"]
-ContextArgsType: TypeAlias = (
-    type[ContextShowArgs]
-    | type[ContextGenerateArgs]
-    | type[ContextPathArgs]
-)
+ContextArgsType: TypeAlias = type[ContextShowArgs] | type[ContextGenerateArgs] | type[ContextPathArgs]
 CliArgs: TypeAlias = (
-    RunArgs
-    | CleanupArgs
-    | TicketArgs
-    | ContextShowArgs
-    | ContextGenerateArgs
-    | ContextPathArgs
-    | HealthArgs
+    RunArgs | CleanupArgs | TicketArgs | ContextShowArgs | ContextGenerateArgs | ContextPathArgs | HealthArgs
 )
+
+
 def parse_args(cli_args: list[str]) -> CliArgs:
     """Parse CLI args via tyro with static typing support."""
     tyro_target = cast(Callable[..., CliArgs], Args)

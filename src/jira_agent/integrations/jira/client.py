@@ -207,9 +207,7 @@ class JiraClient(HTTPIntegration):
         try:
             # Run sync check in executor to avoid blocking
             loop = asyncio.get_event_loop()
-            success, message = await loop.run_in_executor(
-                None, self._check_connection_sync
-            )
+            success, message = await loop.run_in_executor(None, self._check_connection_sync)
             duration = int((time.monotonic() - start) * 1000)
 
             if success:

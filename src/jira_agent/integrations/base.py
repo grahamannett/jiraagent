@@ -203,9 +203,7 @@ class MCPIntegration(Integration):
                             if status == "connected":
                                 mcp_connected = True
                             else:
-                                mcp_error = getattr(
-                                    server, "error", f"Status: {status}"
-                                )
+                                mcp_error = getattr(server, "error", f"Status: {status}")
 
                 elif isinstance(message, ResultMessage):
                     duration = int((time.monotonic() - start) * 1000)

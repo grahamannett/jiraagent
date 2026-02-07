@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -66,9 +65,7 @@ class TestValidateTicketKey:
         with pytest.raises(ValidationError) as exc_info:
             validate_ticket_key(key)
 
-        assert "Invalid ticket key format" in str(exc_info.value) or "cannot be empty" in str(
-            exc_info.value
-        )
+        assert "Invalid ticket key format" in str(exc_info.value) or "cannot be empty" in str(exc_info.value)
 
 
 class TestValidateEnvVars:

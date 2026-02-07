@@ -155,9 +155,7 @@ def make_audit_hook(logger: AuditLogger):
         An async hook function for use with claude_agent_sdk.
     """
 
-    async def audit_hook(
-        input_data: dict[str, Any], tool_use_id: str, _context: Any
-    ) -> dict[str, Any]:
+    async def audit_hook(input_data: dict[str, Any], tool_use_id: str, _context: Any) -> dict[str, Any]:
         """PreToolUse hook that logs tool calls."""
         tool_name = input_data.get("tool_name", "unknown")
         tool_input = input_data.get("tool_input", {})

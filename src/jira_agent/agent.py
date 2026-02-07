@@ -328,9 +328,7 @@ def run(
     Returns:
         AgentResult with implementation status and details.
     """
-    return anyio.run(
-        run_agent, worktree, ticket, context_path, max_turns, additional_info, audit_logger
-    )
+    return anyio.run(run_agent, worktree, ticket, context_path, max_turns, additional_info, audit_logger)
 
 
 # --- Browser Verification ---
